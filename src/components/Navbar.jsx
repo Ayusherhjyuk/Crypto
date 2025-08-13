@@ -1,18 +1,34 @@
-// src/components/Navbar.jsx
 import { Link, useLocation } from "react-router-dom";
-import { FaBitcoin } from "react-icons/fa"; // crypto icon
+import { FaBitcoin } from "react-icons/fa";
+import { useEffect, useState } from "react";
 
 export default function Navbar() {
   const location = useLocation();
+  const [isScrolled, setIsScrolled] = useState(false);
 
   const links = [
     { name: "Dashboard", path: "/" },
     { name: "Portfolio", path: "/portfolio" },
-    { name: "Markets", path: "/markets" }, // example extra page
+    { name: "Markets", path: "/markets" },
   ];
 
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 20);
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
   return (
-    <nav className="bg-white dark:bg-gray-800 shadow-md px-6 py-3 flex justify-between items-center sticky top-0 z-50">
+    <nav
+      className={`sticky top-0 z-50 px-6 py-5 flex justify-between items-center transition-all duration-300
+        ${isScrolled
+          ? "bg-white/20 dark:bg-gray-800/30 backdrop-blur-lg border-b border-white/10 shadow-lg"
+          : "bg-white dark:bg-gray-800 shadow-md"
+        }`}
+    >
       {/* Left - Logo */}
       <div className="flex items-center gap-2">
         <FaBitcoin className="text-yellow-500 text-2xl" />
@@ -30,7 +46,7 @@ export default function Navbar() {
             className={`relative font-medium transition-colors duration-200 ${
               location.pathname === link.path
                 ? "text-blue-500"
-                : "text-gray-700 dark:text-gray-200 hover:text-blue-400"
+                : "text-gray-600 dark:text-gray-200 hover:text-black"
             }`}
           >
             {link.name}
