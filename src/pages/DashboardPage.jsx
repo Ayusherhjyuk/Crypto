@@ -27,7 +27,7 @@ export default function DashboardPage() {
   }, [dispatch]);
 
   const filteredCoins = useMemo(() => {
-   let list = [...coins].sort((a, b) => a.market_cap_rank - b.market_cap_rank);
+   let list = [...coins].sort((a, b) => b.current_price - a.current_price);
 
 if (filter.tier === "top10") list = list.slice(0, 10);
 else if (filter.tier === "top50") list = list.slice(0, 50);
@@ -99,15 +99,15 @@ else if (filter.tier === "top50") list = list.slice(0, 50);
 </select>
 
           <select
-            value={filter.change}
-            onChange={(e) => dispatch(setFilter({ change: e.target.value }))}
-            className="px-4 py-2 rounded-lg bg-white/10 text-white border border-white/30 
-              focus:ring-2 focus:ring-indigo-500 backdrop-blur-md"
-          >
-            <option value="all">All Changes</option>
-            <option value="positive">Positive 24h</option>
-            <option value="negative">Negative 24h</option>
-          </select>
+  value={filter.change}
+  onChange={(e) => dispatch(setFilter({ change: e.target.value }))}
+  className="px-4 py-2 rounded-lg bg-gray-800 text-white border border-white/30 
+    focus:ring-2 focus:ring-indigo-500"
+>
+  <option value="all">All Changes</option>
+  <option value="positive">Positive 24h</option>
+  <option value="negative">Negative 24h</option>
+</select>
         </div>
 
         {/* Coin Cards */}
