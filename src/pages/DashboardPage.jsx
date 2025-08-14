@@ -5,6 +5,7 @@ import { setSearch, setFilter } from "../features/ui/uiSlice";
 import Navbar from "../components/Navbar";
 import CoinChart from "../components/CoinChart";
 import Modal from "../components/Modal";
+import Loader from "../components/Loader";
 import { Sparklines, SparklinesLine } from "react-sparklines";
 import {
   ArrowTrendingUpIcon,
@@ -12,25 +13,38 @@ import {
 } from "@heroicons/react/24/solid";
 
 export default function DashboardPage() {
-  const dispatch = useAppDispatch();
+   const dispatch = useAppDispatch();
   const { search, filter } = useAppSelector((state) => state.ui);
   const coinsState = useAppSelector((state) => state.coins);
   const coins = useAppSelector((state) => Object.values(state.coins.entities));
   const [selectedCoin, setSelectedCoin] = useState(null);
 
+  // NEW: loader visibility control
+  const [showLoader, setShowLoader] = useState(true);
+
   useEffect(() => {
     dispatch(fetchTopCoins());
+
+    // Auto-hide loader after 3 seconds
+    const timer = setTimeout(() => {
+      setShowLoader(false);
+    }, 3000);
+
     const interval = setInterval(() => {
       dispatch(fetchTopCoins());
     }, 30000);
-    return () => clearInterval(interval);
+
+    return () => {
+      clearTimeout(timer);
+      clearInterval(interval);
+    };
   }, [dispatch]);
 
   const filteredCoins = useMemo(() => {
-   let list = [...coins].sort((a, b) => b.current_price - a.current_price);
+    let list = [...coins].sort((a, b) => b.current_price - a.current_price);
 
-if (filter.tier === "top10") list = list.slice(0, 10);
-else if (filter.tier === "top50") list = list.slice(0, 50);
+    if (filter.tier === "top10") list = list.slice(0, 10);
+    else if (filter.tier === "top50") list = list.slice(0, 50);
 
     if (filter.change === "positive") {
       list = list.filter((c) => c.price_change_percentage_24h > 0);
@@ -48,11 +62,14 @@ else if (filter.tier === "top50") list = list.slice(0, 50);
     return list;
   }, [coins, search, filter]);
 
-  if (coinsState.status === "loading")
-    return <p className="text-blue-500 text-xl p-4">Loading...</p>;
-  if (coinsState.error)
-    return <p className="text-red-500 p-4">Error: {coinsState.error}</p>;
+  // Show loader for first 3 seconds regardless of API speed
+  if (showLoader) {
+    return <Loader />;
+  }
 
+  if (coinsState.error) {
+    return <p className="text-red-500 p-4">Error: {coinsState.error}</p>;
+  }
   return (
     <div className="relative min-h-screen bg-gradient-to-br from-gray-900 via-gray-950 to-black text-white">
       {/* Subtle background overlay */}
